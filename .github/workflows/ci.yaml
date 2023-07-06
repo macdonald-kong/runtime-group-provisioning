@@ -28,3 +28,14 @@ jobs:
       run: |
         curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups/${{ steps.create-rg.outputs.RUNTIME_GROUP_ID }}/dp-client-certificates -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' --data '{"cert": "${{ vars.RUNTIME_GROUP_CERT }}"}'
 
+    - name: Create Team
+      id: create-team
+      run: |
+        echo "TEAM_ID=$(curl -X POST https://global.api.konghq.com/v2/teams -H 'Content-Type: application/json' -H 'accept: application/json' -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"name":"${{ vars.TEAM_NAME }}","description":"${{ vars.TEAM_DESCRIPTION }}"}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
+
+    - name: Map Team
+      id: map-team
+      run: |
+        curl -X PUT https://global.api.konghq.com/v2/identity-provider/team-mappings -H 'Content-Type: application/json' -H 'accept: application/json' -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"mappings": [{"group": "${{ vars.TEAM_NAME_IDP }}","team_ids": ["${{ steps.create-team.outputs.TEAM_ID }}"]}]}'
+
+
