@@ -37,7 +37,8 @@ jobs:
     - name: Apply Global Plugins
       run: |
         git clone https://github.com/macdonald-kong/global-plugins
-        deck sync --state ./global-plugins/plugins --konnect-addr ${{ secrets.KONNECT_ADDR }} --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}
+        cd global-plugins
+        deck sync --state kong.yaml,./plugins --konnect-addr ${{ secrets.KONNECT_ADDR }} --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-${{ vars.RUNTIME_GROUP_ENV }}
 
     - name: Create Team
       id: create-team
