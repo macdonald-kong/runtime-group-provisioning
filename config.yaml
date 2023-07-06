@@ -1,0 +1,10 @@
+runtimeGroup: 
+  name: business-unit-1
+  description: "runtime group for business unit 1"
+  labels: label1
+  certificate: xxx
+
+Teams:
+  name: BU1
+  idpName: BU1
+

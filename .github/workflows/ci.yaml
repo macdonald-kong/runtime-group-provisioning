@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: 
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  provision-runtime-group:
+  
+    runs-on: ubuntu-22.04
+    name: Provision New Runtime Group
+
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Create Runtime Group
+      id: create-rg
+      run: |
+        curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "Sandbox-Demo","description": "A test runtime group for demonstration.","labels": {"env": "demo"}}'
+
+
+
+
