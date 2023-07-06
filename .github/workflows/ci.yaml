@@ -21,8 +21,10 @@ jobs:
     - name: Create Runtime Group
       id: create-rg
       run: |
-        curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "Sandbox-Demo","description": "A test runtime group for demonstration.","labels": {"env": "demo"}}'
+        echo "RUNTIME_GROUP_ID=$(curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "Sandbox-Demo","description": "A test runtime group for demonstration.","labels": {"env": "demo"}}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
-
-
+    - name: Upload Certificate
+      id: create-rg
+      run: |
+        curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups/${{ steps.create-rg.outputs.RUNTIME_GROUP_ID }}/dp-client-certificates -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' --data '{"cert": "-----BEGIN CERTIFICATE-----\nMIICuDCCAaACCQDWs+HbD4jMxjANBgkqhkiG9w0BAQsFADAeMQ8wDQYDVQQDDAZr\nb25nZHAxCzAJBgNVBAYTAlVTMB4XDTIzMDUxMTA2MTcyNloXDTIzMDYxMDA2MTcy\nNlowHjEPMA0GA1UEAwwGa29uZ2RwMQswCQYDVQQGEwJVUzCCASIwDQYJKoZIhvcN\nAQEBBQADggEPADCCAQoCggEBAK7hy2UEoovpEx4Gl5VRAMQoxDEamG/WXYYo5uOF\nV5cgIjoH2DodfCk/DIi5XIYe0PsQdCr76FaE/WsiAZUqdVH6e2439ltNa2iOdU9w\n/zm6baDZkZVFJztz20j2VnWskSHKlYWw5XFCwupBNCeHOlrdeG7nLwbKAuNSYgIb\nbDmomIODl3ZyMxeQj3l05MxPUjraB7z9EsThCVR5Lt8LqQM9pQMyeUezyCM2MSkj\nDT6kLNg3rrL2Rezltzex3yL0rwPYpuGynKsxQ+tVBu7GSgLizbzHT9usTBGZr7le\nQweROAKX1htGskkTHmxBE9H1jlsKwxz559lhAD9YkkVDUM0CAwEAATANBgkqhkiG\n9w0BAQsFAAOCAQEAC6Eka63NgCe/psDRDdHmcZBZny57fNy/GBQyUc3P+VSMDOKI\nfZxwCqTRat2KwAnczv9BtpirbOENNvmDi3b6GgHUrCvjPfxnw88ToTi6pB9OZ82l\nBst01Dpe9PdcnqRONdvhQaVjEym42k+ZuTtJMhn6571H2fUJYoxSJkUbw2vNSC+f\njbCFmAlSHmG1UYKEg9FGkKlp4T8L/7l+X+rzu8gJv0m8/b+Dgjucdo96Ks0TdL0D\nAB1ApfuDAOrK8jl+n87xmWofj2Q7++k20ak8J/6ffdL9P4Q8zoqq432srwLaEK8e\nTgk5ImfHGokn4/rxGUcY1rhVJGSWlL+1+Cc0+w==\n-----END CERTIFICATE-----\n"}'
 
