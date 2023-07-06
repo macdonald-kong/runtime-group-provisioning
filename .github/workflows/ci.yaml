@@ -21,7 +21,7 @@ jobs:
     - name: Create Runtime Group
       id: create-rg
       run: |
-        echo "RUNTIME_GROUP_ID=$(curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "${{ vars.RUNTIME_GROUP_NAME }}","description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}","labels": ${{ vars.RUNTIME_GROUP_LABELS }}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
+        echo "RUNTIME_GROUP_ID=$(curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "${{ vars.RUNTIME_GROUP_NAME }}-${{ vars.RUNTIME_GROUP_ENV }}","description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}","labels": {"env": "dev","type":"k8s","team":"bu1"}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
     - name: Upload Certificate
       id: upload-cert
