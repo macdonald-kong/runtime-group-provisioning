@@ -41,4 +41,4 @@ jobs:
     - name: Assign Role
       id: assign-role
       run: |
-        curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"role_name":"Admin","entity_id":"${{ steps.create-rg.outputs.RUNTIME_GROUP_ID }}","entity_type_name":"Runtime Groups","entity_region":"us"}'
+        curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles -H 'Content-Type: application/json' -H 'accept: application/json'-H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"role_name":"Admin","entity_id":"${{ steps.create-rg.outputs.RUNTIME_GROUP_ID }}","entity_type_name":"Runtime Groups","entity_region":"us"}'
