@@ -11,7 +11,7 @@ jobs:
   provision-runtime-group:
   
     runs-on: ubuntu-22.04
-    name: Provision New Runtime Group
+    name: Provision New Runtime Groups
 
     steps:
     
@@ -24,21 +24,32 @@ jobs:
         tar -xf deck.tar.gz -C /tmp
         sudo cp /tmp/deck /usr/local/bin/
 
-    - name: Create Runtime Group
-      id: create-rg
+    - name: Create Dev Runtime Group
+      id: create-rg-dev
       run: |
-        echo "RUNTIME_GROUP_ID=$(curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "${{ vars.RUNTIME_GROUP_NAME }}-${{ vars.RUNTIME_GROUP_ENV }}","description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}","labels": {"env": "dev","type":"k8s","team":"bu1"}}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
+        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "${{ vars.RUNTIME_GROUP_NAME }}-dev","description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}","labels": {"env": "dev","type":"k8s","team":"bu1"}}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
-    - name: Upload Certificate
-      id: upload-cert
+    - name: Create Prod Runtime Group
+      id: create-rg-prod
       run: |
-        curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups/${{ steps.create-rg.outputs.RUNTIME_GROUP_ID }}/dp-client-certificates -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' --data '{"cert": "${{ vars.RUNTIME_GROUP_CERT }}"}'
+        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups -H "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' -H 'accept: application/json' --data '{"name": "${{ vars.RUNTIME_GROUP_NAME }}-prod","description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}","labels": {"env": "prod","type":"k8s","team":"bu1"}}' | jq -r '.id')" >> "$GITHUB_OUTPUT"
+
+    - name: Upload Certificate Dev
+      id: upload-cert-dev
+      run: |
+        curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' --data '{"cert": "${{ vars.RUNTIME_GROUP_CERT }}"}'
+
+    - name: Upload Certificate Prod
+      id: upload-cert-prod
+      run: |
+        curl -X POST ${{ secrets.KONNECT_ADDR }}/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" -H 'Content-Type: application/json' --data '{"cert": "${{ vars.RUNTIME_GROUP_CERT }}"}'
 
     - name: Apply Global Plugins
       run: |
         git clone https://github.com/macdonald-kong/global-plugins
         cd global-plugins
-        deck sync --state kong.yaml,./plugins --konnect-addr ${{ secrets.KONNECT_ADDR }} --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-${{ vars.RUNTIME_GROUP_ENV }}
+        deck sync --state kong.yaml,./plugins --konnect-addr ${{ secrets.KONNECT_ADDR }} --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-dev
+        deck sync --state kong.yaml,./plugins --konnect-addr ${{ secrets.KONNECT_ADDR }} --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-prod
 
     - name: Create Team
       id: create-team
@@ -50,7 +61,8 @@ jobs:
       run: |
         curl -X PUT https://global.api.konghq.com/v2/identity-provider/team-mappings -H 'Content-Type: application/json' -H 'accept: application/json' -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"mappings": [{"group": "${{ vars.TEAM_NAME_IDP }}","team_ids": ["${{ steps.create-team.outputs.TEAM_ID }}"]}]}'
 
-    - name: Assign Role
+    - name: Assign Roles
       id: assign-role
       run: |
-        curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles -H 'Content-Type: application/json' -H 'accept: application/json' -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"role_name":"Admin","entity_id":"${{ steps.create-rg.outputs.RUNTIME_GROUP_ID }}","entity_type_name":"Runtime Groups","entity_region":"us"}'
+        curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles -H 'Content-Type: application/json' -H 'accept: application/json' -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"role_name":"Admin","entity_id":"${{ steps.create-rg.outputs.DEV_RUNTIME_GROUP_ID }}","entity_type_name":"Runtime Groups","entity_region":"us"}'
+        curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles -H 'Content-Type: application/json' -H 'accept: application/json' -H "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" --data '{"role_name":"Viewer","entity_id":"${{ steps.create-rg.outputs.PROD_RUNTIME_GROUP_ID }}","entity_type_name":"Runtime Groups","entity_region":"us"}'
