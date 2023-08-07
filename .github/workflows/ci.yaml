@@ -56,27 +56,27 @@ jobs:
 
     - name: Print Variables
       run: |
-        echo $REGION
-        echo $RG_DEV_NAME
-        echo $RG_DEV_CERT
-        echo $RG_DEV_DESCRIPTION
-        echo $RG_PROD_NAME
-        echo $RG_PROD_CERT
-        echo $RG_PROD_DESCRIPTION
-        echo $TEAM_NAME
-        echo $TEAM_DESCRIPTION
-        echo $TEAM_IDP_GROUP_NAME
+        echo REGION: $REGION
+        echo RUNTIME GROUP DEV NAME: $RG_DEV_NAME
+        echo RUNTIME GROUP DEV CERT: $RG_DEV_CERT
+        echo RUNTIME GROUP DEV DESCRIPTION: $RG_DEV_DESCRIPTION
+        echo RUNTIME GROUP PROD NAME: $RG_PROD_NAME
+        echo RUNTIME GROUP PROD CERT: $RG_PROD_CERT
+        echo RUNTIME GROUP PROD DESCRIPTION: $RG_PROD_DESCRIPTION
+        echo TEAM NAME: $TEAM_NAME
+        echo TEAM DESCRIPTION: $TEAM_DESCRIPTION
+        echo IDP GROUP NAME: $TEAM_IDP_GROUP_NAME
 
     - name: Create Prod Runtime Group
       id: create-rg-prod
       run: |
-        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups \
+        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://$REGION.api.konghq.com/v2/runtime-groups \
           --header "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
           --data '{
-            "name": "${{ vars.RUNTIME_GROUP_NAME }}-prod",
-            "description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}",
+            "name": "$RG_PROD_NAME-prod",
+            "description": "$RG_DEV_DESCRIPTION",
             "labels": {
               "env": "prod",
               "type":"k8s",
@@ -87,7 +87,7 @@ jobs:
     - name: Upload Certificate Dev
       id: upload-cert-dev
       run: |
-        curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST https://$REGION.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
