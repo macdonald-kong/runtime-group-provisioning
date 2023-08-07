@@ -53,34 +53,34 @@ jobs:
     - name: Create Dev Runtime Group
       id: create-rg-dev
       run: |
-        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups \
+        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
           --data '{
-            "name": "${RG_DEV_NAME}",
-            "description": "${RG_DEV_DESCRIPTION}",
+            "name": "${{ env.RG_DEV_NAME }}",
+            "description": "${{ env.RG_DEV_DESCRIPTION }}",
             "labels": {
               "env": "dev",
               "type":"k8s",
-              "team":"${TEAM_NAME}"
+              "team":"${{ env.TEAM_NAME }}"
             }
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
     - name: Create Prod Runtime Group
       id: create-rg-prod
       run: |
-        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups \
+        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups \
           --header "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
           --data '{
-            "name": "${RG_PROD_NAME}-prod",
-            "description": "{$RG_DEV_DESCRIPTION}",
+            "name": "${{ env.RG_PROD_NAME }}",
+            "description": "${{ env.RG_PROD_DESCRIPTION }}",
             "labels": {
               "env": "prod",
               "type":"k8s",
-              "team":"${TEAM_NAME}"
+              "team":"${{ env.TEAM_NAME }}"
             }
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
