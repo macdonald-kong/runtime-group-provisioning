@@ -90,7 +90,7 @@ jobs:
 
     - name: Apply Global Plugins to Prod
       run: |
-        deck sync 
+        deck sync \
           --state kong.yaml,./plugins \
           --konnect-addr https://${{ vars.KONNECT_REGION }}.api.konghq.com \
           --konnect-token ${{ secrets.KONNECT_TOKEN }} \
