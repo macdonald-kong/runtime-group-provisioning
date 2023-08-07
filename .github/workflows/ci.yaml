@@ -28,9 +28,9 @@ jobs:
       id: create-rg-dev
       run: |
         echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups \
-          --headers "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
-          --headers 'Content-Type: application/json' \
-          --headers 'accept: application/json' \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
+          --header 'accept: application/json' \
           --data '{
             "name": "${{ vars.RUNTIME_GROUP_NAME }}-dev",
             "description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}",
@@ -45,9 +45,9 @@ jobs:
       id: create-rg-prod
       run: |
         echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups \
-          --headers "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" \
-          --headers 'Content-Type: application/json' \
-          --headers 'accept: application/json' \
+          --header "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
+          --header 'accept: application/json' \
           --data '{
             "name": "${{ vars.RUNTIME_GROUP_NAME }}-prod",
             "description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}",
@@ -62,8 +62,8 @@ jobs:
       id: upload-cert-dev
       run: |
         curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
-          --headers "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
-          --headers 'Content-Type: application/json' \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
           --data '{
             "cert": "${{ vars.RUNTIME_GROUP_CERT }}"
           }'
@@ -72,8 +72,8 @@ jobs:
       id: upload-cert-prod
       run: |
         curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates \
-          --headers "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
-          --headers 'Content-Type: application/json' \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
           --data '{
             "cert": "${{ vars.RUNTIME_GROUP_CERT }}"
           }'
@@ -100,9 +100,9 @@ jobs:
       id: create-team
       run: |
         echo "TEAM_ID=$(curl -X POST https://global.api.konghq.com/v2/teams \
-          --headers 'Content-Type: application/json' \
-          --headers 'accept: application/json' \
-          --headers "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
+          --header 'accept: application/json' \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --data '{
             "name":"${{ vars.TEAM_NAME }}",
             "description":"${{ vars.TEAM_DESCRIPTION }}"
@@ -123,17 +123,17 @@ jobs:
         jq '.mappings[.mappings| length] |= . + {"group": "${{ vars.TEAM_NAME_IDP }}","team_ids": ["${{ steps.create-team.outputs.TEAM_ID }}"]}' new_team_mapping.json > team_mapping_req.json
 
         curl -X PUT https://global.api.konghq.com/v2/identity-provider/team-mappings \
-        --headers 'Content-Type: application/json' -H 'accept: application/json' \
-        --headers "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+        --header 'Content-Type: application/json' -H 'accept: application/json' \
+        --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
         --data @team_mapping_req.json
 
     - name: Assign Roles Dev
       id: assign-roles-dev
       run: |
         curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles \
-        --headers 'Content-Type: application/json' \ 
-        --headers 'accept: application/json' \
-        --headers  "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+        --header 'Content-Type: application/json' \ 
+        --header 'accept: application/json' \
+        --header  "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
         --data '{
           "role_name":"Admin",
           "entity_id":"${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}",
@@ -145,9 +145,9 @@ jobs:
       id: assign-roles-prod
       run: |
         curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles \
-        --headers 'Content-Type: application/json' \
-        --headers 'accept: application/json' \
-        --headers "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+        --header 'Content-Type: application/json' \
+        --header 'accept: application/json' \
+        --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
         --data '{
           "role_name":"Viewer",
           "entity_id":"${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}",
