@@ -122,6 +122,8 @@ jobs:
         jq --argjson team_mapping "$(<original_team_mapping.json)" '.mappings += [$team_mapping]' team_mapping_template.json > new_team_mapping.json
 
         jq '.mappings[.mappings| length] |= . + {"group": "${{ vars.TEAM_NAME_IDP }}","team_ids": ["${{ steps.create-team.outputs.TEAM_ID }}"]}' new_team_mapping.json > team_mapping_req.json
+        
+        cat team_mapping_req.json
 
         curl -X PUT https://global.api.konghq.com/v2/identity-provider/team-mappings \
         --header 'Content-Type: application/json' -H 'accept: application/json' \
