@@ -41,6 +41,32 @@ jobs:
             }
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
+    - name: Set Variables
+      run: |
+        echo "REGION=$(yq .region ./config.yaml)" >> $GITHUB_ENV
+        echo "RG_DEV_NAME=$(yq .runtimeGroupDev.name ./config.yaml)" >> $GITHUB_ENV
+        echo "RG_DEV_CERT=$(yq .runtimeGroupDev.cert ./config.yaml)" >> $GITHUB_ENV
+        echo "RG_DEV_DESCRIPTION=$(yq .runtimeGroupDev.description ./config.yaml)" >> $GITHUB_ENV
+        echo "RG_PROD_NAME=$(yq .runtimeGroupProd.name ./config.yaml)" >> $GITHUB_ENV
+        echo "RG_PROD_CERT=$(yq .runtimeGroupProd.cert ./config.yaml)" >> $GITHUB_ENV
+        echo "RG_PROD_DESCRIPTION=$(yq .runtimeGroupProd.description ./config.yaml)" >> $GITHUB_ENV
+        echo "TEAM_NAME=$(yq .team.name ./config.yaml)" >> $GITHUB_ENV
+        echo "TEAM_DESCRIPTION=$(yq .team.description ./config.yaml)" >> $GITHUB_ENV
+        echo "TEAM_IDP_GROUP_NAME=$(yq .team.idpGroupName ./config.yaml)" >> $GITHUB_ENV
+
+    - name: Print Variables
+      run: |
+        echo $REGION
+        echo $RG_DEV_NAME
+        echo $RG_DEV_CERT
+        echo $RG_DEV_DESCRIPTION
+        echo $RG_PROD_NAME
+        echo $RG_PROD_CERT
+        echo $RG_PROD_DESCRIPTION
+        echo $TEAM_NAME
+        echo $TEAM_DESCRIPTION
+        echo $TEAM_IDP_GROUP_NAME
+
     - name: Create Prod Runtime Group
       id: create-rg-prod
       run: |
