@@ -135,9 +135,9 @@ jobs:
       id: assign-roles-dev
       run: |
         curl -X POST https://global.api.konghq.com/v2/teams/${{ steps.create-team.outputs.TEAM_ID }}/assigned-roles \
-          --header 'Content-Type: application/json' \ 
+          --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
-          --header  "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --data '{
             "role_name":"Admin",
             "entity_id":"${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}",
