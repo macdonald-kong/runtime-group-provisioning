@@ -87,21 +87,21 @@ jobs:
     - name: Upload Certificate Dev
       id: upload-cert-dev
       run: |
-        curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
-            "cert": "${{ vars.RUNTIME_GROUP_CERT }}"
+            "cert": "${{ env.RG_DEV_CERT }}"
           }'
 
     - name: Upload Certificate Prod
       id: upload-cert-prod
       run: |
-        curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
-            "cert": "${{ vars.RUNTIME_GROUP_CERT }}"
+            "cert": "${{ env.RG_PROD_CERT }}"
           }'
 
     - name: Apply Global Plugins to Dev
@@ -110,18 +110,18 @@ jobs:
         cd global-plugins
         deck sync \
           --state kong.yaml,./plugins \
-          --konnect-addr https://${{ vars.KONNECT_REGION }}.api.konghq.com \
+          --konnect-addr https://${{ env.REGION }}.api.konghq.com \
           --konnect-token ${{ secrets.KONNECT_TOKEN }} \
-          --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-dev
+          --konnect-runtime-group-name ${{ env.RG_DEV_NAME }}
 
     - name: Apply Global Plugins to Prod
       run: |
         cd global-plugins
         deck sync \
           --state kong.yaml,./plugins \
-          --konnect-addr https://${REGION}.api.konghq.com \
+          --konnect-addr https://${{ env.REGION }}.api.konghq.com \
           --konnect-token ${{ secrets.KONNECT_TOKEN }} \
-          --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-prod
+          --konnect-runtime-group-name ${{ env.RG_PROD_NAME }}
 
     - name: Create Team
       id: create-team
@@ -131,8 +131,8 @@ jobs:
           --header 'accept: application/json' \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --data '{
-            "name":"${{ vars.TEAM_NAME }}",
-            "description":"${{ vars.TEAM_DESCRIPTION }}"
+            "name":"${{ env.TEAM_NAME }}",
+            "description":"${{ env.TEAM_DESCRIPTION }}"
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
     - name: Map Team
@@ -146,7 +146,7 @@ jobs:
         jq '{"mappings": .}' team_mapping_resp.json > orig_team_mapping.json
 
         jq '.mappings += [{
-          "group": "${{ vars.TEAM_NAME_IDP }}",
+          "group": "${{ env.TEAM_IDP_GROUP_NAME }}",
           "team_ids": [
             "${{ steps.create-team.outputs.TEAM_ID }}"
           ]
@@ -168,7 +168,7 @@ jobs:
             "role_name":"Admin",
             "entity_id":"${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}",
             "entity_type_name":"Runtime Groups",
-            "entity_region":"${{ vars.KONNECT_REGION }}"
+            "entity_region":"${{ env.REGION }}"
           }'
 
     - name: Assign Roles Prod
@@ -182,5 +182,5 @@ jobs:
             "role_name":"Viewer",
             "entity_id":"${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}",
             "entity_type_name":"Runtime Groups",
-            "entity_region":"${{ vars.KONNECT_REGION }}"
+            "entity_region":"${{ env.REGION }}"
           }'

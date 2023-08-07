@@ -9,5 +9,5 @@ runtimeGroupProd:
   description: 'Sales Prod Env.  This runtime group was created by a GitHub Actions Pipeline'
 team:
   name: 'Sales Team'
-  description: 'Sales Team.  Created by a GitHub Actions Pipeline'
+  description: 'Sales team in ACME Co.'
   idpGroupName: 'Sales_Team'
