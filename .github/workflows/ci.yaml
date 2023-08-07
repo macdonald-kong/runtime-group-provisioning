@@ -80,6 +80,7 @@ jobs:
 
     - name: Apply Global Plugins to Dev
       run: |
+        git clone https://github.com/macdonald-kong/global-plugins
         cd global-plugins
         deck sync \
           --state kong.yaml,./plugins \
@@ -89,7 +90,6 @@ jobs:
 
     - name: Apply Global Plugins to Prod
       run: |
-        git clone https://github.com/macdonald-kong/global-plugins
         cd global-plugins
         deck sync \
           --state kong.yaml,./plugins \
