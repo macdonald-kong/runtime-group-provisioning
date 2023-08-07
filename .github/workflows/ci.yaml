@@ -37,19 +37,6 @@ jobs:
         echo "TEAM_DESCRIPTION=$(yq .team.description ./config.yaml)" >> $GITHUB_ENV
         echo "TEAM_IDP_GROUP_NAME=$(yq .team.idpGroupName ./config.yaml)" >> $GITHUB_ENV
 
-    - name: Print Variables
-      run: |
-        echo REGION: $REGION
-        echo RUNTIME GROUP DEV NAME: $RG_DEV_NAME
-        echo RUNTIME GROUP DEV CERT: $RG_DEV_CERT
-        echo RUNTIME GROUP DEV DESCRIPTION: $RG_DEV_DESCRIPTION
-        echo RUNTIME GROUP PROD NAME: $RG_PROD_NAME
-        echo RUNTIME GROUP PROD CERT: $RG_PROD_CERT
-        echo RUNTIME GROUP PROD DESCRIPTION: $RG_PROD_DESCRIPTION
-        echo TEAM NAME: $TEAM_NAME
-        echo TEAM DESCRIPTION: $TEAM_DESCRIPTION
-        echo IDP GROUP NAME: $TEAM_IDP_GROUP_NAME
-
     - name: Create Dev Runtime Group
       id: create-rg-dev
       run: |
@@ -62,8 +49,7 @@ jobs:
             "description": "${{ env.RG_DEV_DESCRIPTION }}",
             "labels": {
               "env": "dev",
-              "type":"k8s",
-              "team":"${{ env.TEAM_NAME }}"
+              "type":"k8s"
             }
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
@@ -79,8 +65,7 @@ jobs:
             "description": "${{ env.RG_PROD_DESCRIPTION }}",
             "labels": {
               "env": "prod",
-              "type":"k8s",
-              "team":"${{ env.TEAM_NAME }}"
+              "type":"k8s"
             }
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
