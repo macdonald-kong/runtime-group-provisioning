@@ -24,23 +24,6 @@ jobs:
         tar -xf deck.tar.gz -C /tmp
         sudo cp /tmp/deck /usr/local/bin/
 
-    - name: Create Dev Runtime Group
-      id: create-rg-dev
-      run: |
-        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups \
-          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
-          --header 'Content-Type: application/json' \
-          --header 'accept: application/json' \
-          --data '{
-            "name": "${{ vars.RUNTIME_GROUP_NAME }}-dev",
-            "description": "${{ vars.RUNTIME_GROUP_DESCRIPTION }}",
-            "labels": {
-              "env": "dev",
-              "type":"k8s",
-              "team":"bu1"
-            }
-          }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
-
     - name: Set Variables
       run: |
         echo "REGION=$(yq .region ./config.yaml)" >> $GITHUB_ENV
@@ -67,27 +50,44 @@ jobs:
         echo TEAM DESCRIPTION: $TEAM_DESCRIPTION
         echo IDP GROUP NAME: $TEAM_IDP_GROUP_NAME
 
+    - name: Create Dev Runtime Group
+      id: create-rg-dev
+      run: |
+        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
+          --header 'accept: application/json' \
+          --data '{
+            "name": "${RG_DEV_NAME}",
+            "description": "${RG_DEV_DESCRIPTION}",
+            "labels": {
+              "env": "dev",
+              "type":"k8s",
+              "team":"${TEAM_NAME}"
+            }
+          }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
+
     - name: Create Prod Runtime Group
       id: create-rg-prod
       run: |
-        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://$REGION.api.konghq.com/v2/runtime-groups \
+        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups \
           --header "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
           --data '{
-            "name": "$RG_PROD_NAME-prod",
-            "description": "$RG_DEV_DESCRIPTION",
+            "name": "${RG_PROD_NAME}-prod",
+            "description": "{$RG_DEV_DESCRIPTION}",
             "labels": {
               "env": "prod",
               "type":"k8s",
-              "team":"bu1"
+              "team":"${TEAM_NAME}"
             }
           }' | jq -r '.id')" >> "$GITHUB_OUTPUT"
 
     - name: Upload Certificate Dev
       id: upload-cert-dev
       run: |
-        curl -X POST https://$REGION.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
@@ -97,7 +97,7 @@ jobs:
     - name: Upload Certificate Prod
       id: upload-cert-prod
       run: |
-        curl -X POST https://${{ vars.KONNECT_REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST https://${REGION}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
@@ -119,7 +119,7 @@ jobs:
         cd global-plugins
         deck sync \
           --state kong.yaml,./plugins \
-          --konnect-addr https://${{ vars.KONNECT_REGION }}.api.konghq.com \
+          --konnect-addr https://${REGION}.api.konghq.com \
           --konnect-token ${{ secrets.KONNECT_TOKEN }} \
           --konnect-runtime-group-name ${{ vars.RUNTIME_GROUP_NAME }}-prod
 
