@@ -142,7 +142,7 @@ jobs:
             "role_name":"Admin",
             "entity_id":"${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}",
             "entity_type_name":"Runtime Groups",
-            "entity_region":"${{ vars.KONNECT_REGION }}"}'
+            "entity_region":"${{ vars.KONNECT_REGION }}"
           }'
 
     - name: Assign Roles Prod
