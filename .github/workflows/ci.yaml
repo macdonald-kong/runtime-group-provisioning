@@ -53,7 +53,7 @@ jobs:
     - name: Create Dev Runtime Group
       id: create-rg-dev
       run: |
-        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups \
+        echo "DEV_RUNTIME_GROUP_ID=$(curl -X POST "https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups" \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
@@ -70,8 +70,8 @@ jobs:
     - name: Create Prod Runtime Group
       id: create-rg-prod
       run: |
-        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups \
-          --header "Authorization:Bearer ${{ secrets.KONNECT_TOKEN }}" \
+        echo "PROD_RUNTIME_GROUP_ID=$(curl -X POST "https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups" \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --header 'accept: application/json' \
           --data '{
@@ -87,7 +87,7 @@ jobs:
     - name: Upload Certificate Dev
       id: upload-cert-dev
       run: |
-        curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST "https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-dev.outputs.DEV_RUNTIME_GROUP_ID }}/dp-client-certificates" \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
@@ -97,7 +97,7 @@ jobs:
     - name: Upload Certificate Prod
       id: upload-cert-prod
       run: |
-        curl -X POST https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates \
+        curl -X POST "https://${{ env.REGION }}.api.konghq.com/v2/runtime-groups/${{ steps.create-rg-prod.outputs.PROD_RUNTIME_GROUP_ID }}/dp-client-certificates" \
           --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
           --header 'Content-Type: application/json' \
           --data '{
